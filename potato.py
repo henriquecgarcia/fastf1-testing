@@ -33,9 +33,6 @@ def saveLaps(laps, location, year, session_type):
 	if os.path.exists(f'csv/{location}.csv'):
 		previous_laps = pd.read_csv(f"csv/{location}.csv")
 		updated_laps = pd.concat([previous_laps, _laps], ignore_index=True)
-	# Appending new data to the existing data
-	# Fixing the indexes
-	updated_laps.reset_index(drop=True, inplace=True)
 	updated_laps.to_csv(f'csv/{location}.csv', index=False)
 
 def getYearData(year, start_race = ""):
@@ -65,7 +62,11 @@ def getYearData(year, start_race = ""):
 			try:
 				session = ff1.get_session(year, row_value['Location'], session_type)
 				session.load()
-				saveLaps(session.laps, row_value['Location'], year, session_type)
+				gp_name = row_value['EventName']
+				# Fixing the name of the Grand Prix
+				# Australian Grand Prix	-> Australian GP
+				gp_name = gp_name.replace('Grand Prix', 'GP')
+				saveLaps(session.laps, gp_name, year, session_type)
 				year_data.append({'session_data': session, 'Location': row_value['Location']})
 			except Exception as e:
 				print(f'Error on {year} - {row_value["Location"]} - {session_type}')
@@ -76,7 +77,7 @@ def getYearData(year, start_race = ""):
 	return year_data
 
 try:
-	data = getYearData(2019)
+	data = getYearData(2020, "Istanbul")
 	# for race in data:
 	# 	laps = {}
 	# 	for lap in race['session_data']:
